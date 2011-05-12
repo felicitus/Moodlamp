@@ -29,6 +29,7 @@ void control_init(void) {
 		default:
 			control_cmd = CTRL_CMD_RUN_FADING;
 			control_param = FADING_MODE_SMOOTH;
+			fe_speed = 512;
 	}
 	
 }
@@ -43,19 +44,19 @@ void control_handler(void) {
 
 		switch (control_cmd) {
 			case CTRL_CMD_STANDBY:
-
-#ifdef USART_DEBUG
-		usart0_puts("CTRL_CMD_STANDBY\n\r");
-#endif
-				control_setColorRGB(0x00, 0x00, 0x00);
-				fe_mode = FADING_MODE_DISABLED;
+	#ifdef USART_DEBUG
+			usart0_puts("CTRL_CMD_STANDBY\n\r");
+	#endif
+					control_setColorRGB(0x00, 0x00, 0x00);
+					fe_mode = FADING_MODE_DISABLED;
 				break;
 			case CTRL_CMD_POWERON:
-#ifdef USART_DEBUG
-		usart0_puts("CTRL_CMD_POWERON\n\r");
-#endif
-				control_init();
-				control_handler();
+	#ifdef USART_DEBUG
+			usart0_puts("CTRL_CMD_POWERON\n\r");
+	#endif
+					control_init();
+					control_handler();
+
 				break;
 			case CTRL_CMD_SET_COLOR:
 #ifdef USART_DEBUG
@@ -163,7 +164,7 @@ void control_setColor(uint8_t color) {
 		control_setColorRGB(0xe6,0x00,0xff);
 	else if (color == CTRL_COLOR_HUE_318)
 		control_setColorRGB(0xff,0x00,0xb3);
-	else if (color == CTRL_COLOR_HUE_318)
+	else if (color == CTRL_COLOR_HUE_342)
 		control_setColorRGB(0xff,0x04,0x4d);
 	fe_mode = FADING_MODE_DISABLED;
 }
