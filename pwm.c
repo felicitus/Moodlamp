@@ -32,6 +32,8 @@
 #include <avr/pgmspace.h>
 
 #include "config.h"
+#include "control.h"
+#include "usart.h"
 #include "pwm.h"
 //#include "static_scripts.h"
 
@@ -103,7 +105,7 @@ volatile struct global_pwm_t global_pwm;
 /* FUNCTIONS AND INTERRUPTS */
 
 /** init timer 1 */
-void init_timer1(void)
+inline void init_timer1(void)
 {
 	/* no prescaler, CTC mode */
 	TCCR1B = _BV(CS10) | _BV(WGM12);
@@ -138,7 +140,7 @@ void init_pwm(void) {
 	for (i=0; i<3; i++) {
 		global_pwm.channels[i].brightness = 0;
 		global_pwm.channels[i].target_brightness = 0;
-		global_pwm.channels[i].speed = 0x0200;
+		global_pwm.channels[i].speed = 0x00200;
 		global_pwm.channels[i].flags.target_reached = 0;
 		global_pwm.channels[i].remainder = 0;
 		global_pwm.channels[i].mask = _BV(i+LED_OFFSET);
@@ -229,7 +231,50 @@ void update_pwm_timeslots(void) {
 
 /** fade any channels not already at their target brightness */
 void update_brightness(void) {
-	uint8_t i;
+	uint8_t i, max_speed_channel = 0, max_distance_channel = 0, max_distance = 0;
+	uint16_t max_speed = 0;
+	uint8_t distance[PWM_CHANNELS];
+
+	// The original code just scaled each channel the same way. This gives a few bugs,
+	// because if you have an initial brightness of RGB(0,0,0) and a target brightness of RGB(12,100,114),
+	// the old scaler would fade equal, which doesn't look too good. In the example, it would
+	// fade to RGB(12,12,12) then to RGB(12,100,100) and then too RGB(12,100,114).
+
+	// This new code adjusts the speed for each channel, so speed is calculated.
+
+	if (global_pwm.new_target == 1) {
+		// Calculate speed
+		for (i=0; i<PWM_CHANNELS; i++) {
+			if (global_pwm.channels[i].speed > max_speed) {
+				max_speed = global_pwm.channels[i].speed;
+				max_speed_channel = i;
+			}
+		}
+
+		// Calculate relative speed for all channels
+		for (i=0;i<PWM_CHANNELS;i++) {
+			distance[i] = abs(global_pwm.channels[i].brightness - global_pwm.channels[i].target_brightness);
+
+			if (distance[i] > max_distance) {
+				max_distance = distance[i];
+				max_distance_channel = i;
+			}
+		}
+
+		for (i=0;i<PWM_CHANNELS;i++) {
+			if (distance[i] > 0) {
+				global_pwm.channels[i].speed = max_speed / (max_distance / distance[i]);
+			} else {
+				global_pwm.channels[i].speed = max_speed;
+			}
+
+			global_pwm.channels[i].remainder = 0;
+			global_pwm.channels[i].flags.target_reached = 0;
+		}
+
+		global_pwm.new_target = 0;
+	}
+
 
 	/* iterate over the channels */
 	for (i=0; i<PWM_CHANNELS; i++) {
@@ -307,7 +352,7 @@ ISR(TIMER1_COMPA_vect) {
 		PORT_LED = ~pwm.initial_bitmask;
         
 		/* if next timeslot would happen too fast or has already happened, just spinlock */
-		while (TCNT1 + 500 > pwm.slots[pwm.index].top) {
+		while (TCNT1 + 2000 > pwm.slots[pwm.index].top) {
 			/* spin until timer interrupt is near enough */
 			while (pwm.slots[pwm.index].top > TCNT1) {
 				asm volatile ("nop");

@@ -23,7 +23,7 @@ void ir_init() {
 	irmp_init(); 
 }
 
-ISR(TIMER0_COMPA_vect)
+ISR(TIMER0_COMPA_vect, ISR_NOBLOCK)
 {
   (void) irmp_ISR();                                                        // call irmp ISR
   // call other timer interrupt routines...
@@ -43,62 +43,77 @@ void ir_handler() {
 				case RC_CHINARGB_RED:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_0;
+					usart0_puts("RC_CHINARGB_RED\n\r");
 					break;
 				case RC_CHINARGB_RED1:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_24;
+					usart0_puts("RC_CHINARGB_RED1\n\r");
 					break;
 				case RC_CHINARGB_RED2:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_48;
+					usart0_puts("RC_CHINARGB_RED2\n\r");
 					break;
 				case RC_CHINARGB_RED3:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_72;
+					usart0_puts("RC_CHINARGB_RED3\n\r");
 					break;
 				case RC_CHINARGB_RED4:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_96;
+					usart0_puts("RC_CHINARGB_RED4\n\r");
 					break;
 				case RC_CHINARGB_GREEN:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_120;
+					usart0_puts("RC_CHINARGB_GREEN\n\r");
 					break;
 				case RC_CHINARGB_GREEN1:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_144;
+					usart0_puts("RC_CHINARGB_GREEN1\n\r");
 					break;
 				case RC_CHINARGB_GREEN2:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_168;
+					usart0_puts("RC_CHINARGB_GREEN2\n\r");
 					break;
 				case RC_CHINARGB_GREEN3:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_192;
+					usart0_puts("RC_CHINARGB_GREEN3\n\r");
 					break;
 				case RC_CHINARGB_GREEN4:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_222;
+					usart0_puts("RC_CHINARGB_GREEN4\n\r");
 					break;
 				case RC_CHINARGB_BLUE:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_246;
+					usart0_puts("RC_CHINARGB_BLUE\n\r");
 					break;
 				case RC_CHINARGB_BLUE1:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_270;
+					usart0_puts("RC_CHINARGB_BLUE1\n\r");
 					break;
 				case RC_CHINARGB_BLUE2:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_294;
+					usart0_puts("RC_CHINARGB_BLUE2\n\r");
 					break;
 				case RC_CHINARGB_BLUE3:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_318;
+					usart0_puts("RC_CHINARGB_BLUE3\n\r");
 					break;
 				case RC_CHINARGB_BLUE4:
 					control_cmd = CTRL_CMD_SET_COLOR;
 					control_param = CTRL_COLOR_HUE_342;
+					usart0_puts("RC_CHINARGB_BLUE4\n\r");
 					break;
 				case RC_CHINARGB_WHITE:
 					control_cmd = CTRL_CMD_SET_COLOR;
@@ -132,6 +147,8 @@ void ir_handler() {
 				case RC_CHINARGB_DARKER:
 					control_cmd = CTRL_CMD_SPEED_DOWN;
 					break;
+				default:
+					usart0_puts("Uknown code\n\r");
 				
 			}
 		} else if ( irmp_data.protocol == IRMP_RC5_PROTOCOL ) {   // RC5 Remote

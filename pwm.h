@@ -120,6 +120,7 @@ struct channel_t
 struct global_pwm_t {
     /* current channel records */
     struct channel_t channels[3];
+    uint8_t new_target:1;
 };
 
 extern volatile struct global_pwm_t global_pwm;
